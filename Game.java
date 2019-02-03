@@ -26,7 +26,7 @@ class Game
         {
             for(int j=0;j<this.grid[0].length;j++)
             {
-                this.grid[i][j] = "0";
+                this.grid[i][j] = null;
             }
         }
         turn = 0;
@@ -36,23 +36,25 @@ class Game
         this.p1 = one;
         this.p2 = two;
         // instead of a garbage value, add None
+        grid = new String[3][3];
         for(int i=0;i<this.grid.length;i++)
         {
             for(int j=0;j<this.grid[0].length;j++)
             {
-                this.grid[i][j] = "0";
+                this.grid[i][j] = null;
             }
         }
         turn = 0;
     }
-    public void move()
+    public boolean move()
     {
         int choice = 0;
-        if(turn%2==0)
+        Scanner sc= new Scanner(System.in);
+        System.out.println(this.p1.name + ", enter the grid you want to add the cross in");
+        choice = Integer.parseInt(sc.nextLine());
+        choice -= 1;
+        if(this.turn%2==0)
         {
-            Scanner sc= new Scanner(System.in);
-            System.out.println(this.p1.name + ", enter the grid you want to add the cross in");
-            choice = Integer.parseInt(sc.nextLine());
             // check if the choice os right
             int count = 0;
             for(int i=0;i<this.grid.length;i++)
@@ -65,12 +67,18 @@ class Game
                 }
             }
         }
+        this.turn += 1;
         this.printGrid();
-        if(turn%2!=0)
+        if(didWin())
         {
-            System.out.println(this.p2.name + ", enter the grid you want to add the circle in");
-            Scanner sc = new Scanner(System.in);
-            choice = Integer.parseInt(sc.nextLine());
+            System.out.println(p1.name + " has won the game!");
+            return true;
+        }
+        System.out.println(this.p2.name + ", enter the grid you want to add the circle in");
+        choice = Integer.parseInt(sc.nextLine());
+        choice -= 1;
+        if(this.turn%2!=0)
+        {
             // check if the choice os right
             int count = 0;
             for(int i=0;i<this.grid.length;i++)
@@ -78,24 +86,119 @@ class Game
                 for(int j=0;j<this.grid[0].length;j++)
                 {
                     if(count == choice && (this.grid[i][j] != "O" || this.grid[i][j]!="X"))
-                        this.grid[i][j] = "X";
+                        this.grid[i][j] = "O";
                     count += 1;
                 }
             }
         }
         this.printGrid();
+        if(didWin())
+        {
+            System.out.println(p2.name+" has won the game!");
+            return true;
+        }
+        this.turn += 1;
+        return false;
     }
     // check if anyone won
+    public boolean didWin()
+    {
+        /** shows if the player won the game.
+         */
+        // checks the rows
+        for(int i=0;i<this.grid.length; i++)
+        {
+            int count = 0;
+            for(int j=0;j<this.grid[0].length-1;j++)
+            {
+                if (this.grid[i][j] == this.grid[i][j+1] && this.grid[i][j]!=null)
+                {
+                    count +=1;
+                }
+                if( count == 2)
+                    return true;
+            }
+        }
+        //checks for the columns
+        for(int i=0;i<this.grid.length; i++)
+        {
+            int count = 0;
+            for(int j=0;j<this.grid[0].length-1;j++)
+            {
+                if (this.grid[j][i] == this.grid[j+1][i] && this.grid[i][j]!=null)
+                {
+                    count +=1;
+                }
+                if( count == 2)
+                    return true;
+            }
+        }
+        // checks the right diagonal
+        for(int i=0;i<this.grid.length;i++)
+        { 
+            int count = 0;
+            for(int j=0;j<this.grid[0].length-1;j++)
+            {
+                if(i+j == this.grid.length && this.grid[i][j]!=null)
+                {
+                    if(this.grid[i][j] == this.grid[i-1][j+1])
+                    {
+                       count += 1;
+                    }
+                }
+            }
+            if(count == 2)
+            return true;
+        }
+        for(int i=0;i<this.grid.length-1;i++)
+        {   
+            int count = 0;
+            for(int j=0;j<this.grid[0].length;j++)
+            {
+                if(i==j)
+                {
+                    if(this.grid[i][j] == this.grid[i+1][j+1] && this.grid[i][j]!=null)
+                    {
+                        count +=1;
+                    }
+                }
+            }
+          if(count ==2)
+                return true; 
+            }
+            return false;
+    }
     public void printGrid()
     {// prints the grid of the game
         for(int i=0;i<this.grid.length;i++)
         {
             for(int j=0;j<this.grid[0].length;j++)
             {
-                System.out.print(this.grid[i][j]+"   ");
+                System.out.print(this.grid[i][j]+"\t");
             }
             System.out.println();
         }
+    }
+    public static void main(String args[])
+    {
+        Scanner sc = new Scanner(System.in);
+        String n = "";
+        System.out.println("Player 1, Enter your name.");
+        n=sc.nextLine();
+        Player one = new Player(n);
+        System.out.println("Player 2, Enter your name.");
+        n=sc.nextLine();
+        Player two = new Player(n);
+        Game g = new Game(one, two);
+        while(true)
+        {
+            boolean var = g.move();
+            if(var == true)
+            {
+                break;
+            }
+        }
+        System.out.println("Game over.");
     }
 }
 class Player
@@ -112,20 +215,6 @@ class Player
     Player(String n)
     {
         this.name = n;
-    }
-}
-class Main
-{
-    public static void main(String args[])
-    {
-        Scanner sc = new Scanner(System.in);
-        System.out.println("Player 1, Enter your name.");
-        Player one = new Player("name");
-        System.out.println("Player 2, Enter your name.");
-        Player two = new Player("name");
-        Game g = new Game(one, two);
-        g.printGrid();
-
     }
 }
 
